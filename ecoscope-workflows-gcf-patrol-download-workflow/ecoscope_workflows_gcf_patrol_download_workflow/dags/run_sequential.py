@@ -177,7 +177,6 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             client=er_client_name,
             time_range=time_range,
             include_patrol_details=True,
-            include_event_details=True,
             raise_on_empty=False,
             truncate_to_time_range=True,
             sub_page_size=100,

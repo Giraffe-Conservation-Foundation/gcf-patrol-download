@@ -193,7 +193,11 @@
           "additionalProperties": false,
           "properties": {
             "groupers": {
-              "default": null,
+              "default": [
+                {
+                  "index_name": "patrol_serial_number"
+                }
+              ],
               "items": {
                 "anyOf": [
                   {
