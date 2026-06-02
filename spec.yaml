@@ -64,6 +64,8 @@ rjsf-overrides:
     Process Patrol Observations.properties.groupers.properties.groupers.items.anyOf:
       - {"$ref": "#/$defs/ValueGrouper"}
       - {"$ref": "#/$defs/TemporalGrouper"}
+    Process Patrol Observations.properties.groupers.properties.groupers.default:
+      - index_name: "patrol_serial_number"
 
     Generate Maps.properties.set_skip_map.properties.var.description: >-
       Skip generating maps. Recommended for large datasets to improve performance.
