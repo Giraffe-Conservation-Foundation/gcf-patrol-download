@@ -61,9 +61,29 @@ rjsf-overrides:
       Columns to remove from the patrol events export. Defaults match the GCF Twiga Tools
       Event Download page. Adjust as needed.
 
+    Process Patrol Observations.properties.groupers.properties.groupers.items.anyOf:
+      - {"$ref": "#/$defs/ValueGrouper"}
+      - {"$ref": "#/$defs/TemporalGrouper"}
+
     Generate Maps.properties.set_skip_map.properties.var.description: >-
       Skip generating maps. Recommended for large datasets to improve performance.
     Generate Maps.properties.set_skip_map.properties.var.default: true
+
+  $defs:
+    ValueGrouper:
+      title: "Category"
+      type: "object"
+      properties:
+        index_name:
+          title: "Index Name"
+          type: "string"
+          oneOf:
+            - const: "patrol_serial_number"
+              title: "Patrol Serial Number"
+            - const: "patrol_type"
+              title: "Patrol Type"
+            - const: "patrol_subject"
+              title: "Patrol Subject"
 
   uiSchema:
     Process Patrol Observations.filter_patrol_obs.filter_point_coords.items.ui:options.label: false
@@ -112,6 +132,7 @@ workflow:
           client: ${{ workflow.er_client_name.return }}
           time_range: ${{ workflow.time_range.return }}
           include_patrol_details: true
+          include_event_details: true
           raise_on_empty: false
           truncate_to_time_range: true
           sub_page_size: 100
