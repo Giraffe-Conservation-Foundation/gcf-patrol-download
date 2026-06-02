@@ -31,7 +31,7 @@ rjsf-overrides:
       CSV opens directly in Excel. Parquet preserves geometry and is recommended for
       spatial analysis.
 
-    Process Patrol Events.properties.process_event_details.properties.drop_columns.default:
+    Process Patrol Events.properties.process_event_columns.properties.drop_columns.default:
       - level_8
       - index
       - location
@@ -57,7 +57,7 @@ rjsf-overrides:
       - url
       - image_url
       - external_source
-    Process Patrol Events.properties.process_event_details.properties.drop_columns.description: >-
+    Process Patrol Events.properties.process_event_columns.properties.drop_columns.description: >-
       Columns to remove from the patrol events export. Defaults match the GCF Twiga Tools
       Event Download page. Adjust as needed.
 
