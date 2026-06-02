@@ -201,9 +201,6 @@
                   },
                   {
                     "$ref": "#/$defs/TemporalGrouper"
-                  },
-                  {
-                    "$ref": "#/$defs/SpatialGrouper"
                   }
                 ],
                 "title": "Group by"
@@ -775,18 +772,28 @@
       "type": "object"
     },
     "ValueGrouper": {
+      "title": "Category",
+      "type": "object",
       "properties": {
         "index_name": {
-          "oneOf": [],
-          "title": "Category",
-          "type": "string"
+          "title": "Index Name",
+          "type": "string",
+          "oneOf": [
+            {
+              "const": "patrol_serial_number",
+              "title": "Patrol Serial Number"
+            },
+            {
+              "const": "patrol_type",
+              "title": "Patrol Type"
+            },
+            {
+              "const": "patrol_subject",
+              "title": "Patrol Subject"
+            }
+          ]
         }
-      },
-      "required": [
-        "index_name"
-      ],
-      "title": "Category",
-      "type": "object"
+      }
     },
     "BoundingBox": {
       "properties": {
