@@ -423,7 +423,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         )
         .partial(
             df=drop_extra_prefix_traj,
-            rename_columns={"patrol_type__value": "patrol_type"},
+            rename_columns={},
             drop_columns=["id"],
             retain_columns=[],
             raise_if_not_found=False,
@@ -509,6 +509,30 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         .call()
     )
 
+    traj_rename_grouper_columns = (
+        task(map_columns)
+        .validate()
+        .set_task_instance_id("traj_rename_grouper_columns")
+        .handle_errors()
+        .with_tracing()
+        .skipif(
+            conditions=[
+                any_is_empty_df,
+                any_dependency_skipped,
+            ],
+            unpack_depth=1,
+        )
+        .partial(
+            df=traj_add_temporal_index,
+            drop_columns=["patrol_type"],
+            retain_columns=[],
+            raise_if_not_found=False,
+            rename_columns={"patrol_type__value": "patrol_type"},
+            **(params.get("traj_rename_grouper_columns") or {}),
+        )
+        .call()
+    )
+
     traj_colormap = (
         task(apply_color_map)
         .validate()
@@ -523,7 +547,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             unpack_depth=1,
         )
         .partial(
-            df=traj_add_temporal_index,
+            df=traj_rename_grouper_columns,
             colormap=[
                 "#FF9600",
                 "#F23B0E",
