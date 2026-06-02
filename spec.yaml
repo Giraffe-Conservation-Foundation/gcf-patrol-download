@@ -205,8 +205,7 @@ workflow:
         task: map_columns
         partial:
           df: ${{ workflow.drop_extra_prefix_traj.return }}
-          rename_columns:
-            patrol_type__value: "patrol_type"
+          rename_columns: {}
           drop_columns: ["id"]
           retain_columns: []
           raise_if_not_found: false
@@ -237,11 +236,22 @@ workflow:
           cast_to_datetime: true
           format: "mixed"
 
+      - name: Rename Grouper Columns for Trajectories
+        id: traj_rename_grouper_columns
+        task: map_columns
+        partial:
+          df: ${{ workflow.traj_add_temporal_index.return }}
+          drop_columns: ["patrol_type"]
+          retain_columns: []
+          raise_if_not_found: false
+          rename_columns:
+            patrol_type__value: "patrol_type"
+
       - name: Trajectory Colormap
         id: traj_colormap
         task: apply_color_map
         partial:
-          df: ${{ workflow.traj_add_temporal_index.return }}
+          df: ${{ workflow.traj_rename_grouper_columns.return }}
           colormap: ["#FF9600", "#F23B0E", "#A100CB", "#F04564", "#03421A", "#3089FF", "#E26FFF", "#8C1700", "#002960", "#FFD000", "#B62879", "#680078", "#005A56", "#0056C7", "#331878", "#E76826"]
           input_column_name: ${{ workflow.set_patrol_traj_color_column.return }}
           output_column_name: "patrol_traj_colormap"
