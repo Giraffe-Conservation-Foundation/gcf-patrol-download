@@ -132,7 +132,6 @@ workflow:
           client: ${{ workflow.er_client_name.return }}
           time_range: ${{ workflow.time_range.return }}
           include_patrol_details: true
-          include_event_details: true
           raise_on_empty: false
           truncate_to_time_range: true
           sub_page_size: 100
