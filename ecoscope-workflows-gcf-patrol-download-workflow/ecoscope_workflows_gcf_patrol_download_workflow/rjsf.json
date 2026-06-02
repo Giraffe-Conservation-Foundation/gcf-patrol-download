@@ -262,13 +262,39 @@
           "additionalProperties": false,
           "properties": {
             "drop_columns": {
-              "default": [],
+              "default": [
+                "level_8",
+                "index",
+                "location",
+                "reported_by",
+                "event_details",
+                "geojson",
+                "attributes",
+                "notes",
+                "patrols",
+                "patrol_segments",
+                "is_contained_in",
+                "related_subjects",
+                "location_lat",
+                "location_lon",
+                "message",
+                "provenance",
+                "event_category",
+                "priority_label",
+                "comment",
+                "end_time",
+                "sort_at",
+                "icon_id",
+                "url",
+                "image_url",
+                "external_source"
+              ],
               "items": {
                 "type": "string"
               },
               "title": "Drop Columns",
               "type": "array",
-              "description": "List of columns to drop.",
+              "description": "Columns to remove from the patrol events export. Defaults match the GCF Twiga Tools Event Download page. Adjust as needed.",
               "ecoscope:advanced": true
             }
           },
@@ -300,40 +326,6 @@
           "required": [],
           "type": "object",
           "title": "Apply SQL Query to Events"
-        },
-        "process_event_details": {
-          "properties": {
-            "drop_columns": {
-              "default": [
-                "level_8",
-                "index",
-                "location",
-                "reported_by",
-                "event_details",
-                "geojson",
-                "attributes",
-                "notes",
-                "patrols",
-                "patrol_segments",
-                "is_contained_in",
-                "related_subjects",
-                "location_lat",
-                "location_lon",
-                "message",
-                "provenance",
-                "event_category",
-                "priority_label",
-                "comment",
-                "end_time",
-                "sort_at",
-                "icon_id",
-                "url",
-                "image_url",
-                "external_source"
-              ],
-              "description": "Columns to remove from the patrol events export. Defaults match the GCF Twiga Tools Event Download page. Adjust as needed."
-            }
-          }
         }
       }
     },
