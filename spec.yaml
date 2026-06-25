@@ -5,7 +5,7 @@ requirements:
     version: ">=2.11.14, <2.12.0"
     channel: https://repo.prefix.dev/ecoscope-workflows/
   - name: ecoscope-workflows-ext-custom
-    version: ">=0.1.0rc14"
+    version: "0.1.0rc6"
     channel: https://repo.prefix.dev/ecoscope-workflows-custom/
   # Once ecoscope-workflows-ext-gcf is published to a conda channel, replace
   # ext-custom above with:
