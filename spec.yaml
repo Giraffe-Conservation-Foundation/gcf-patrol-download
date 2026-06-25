@@ -4,9 +4,9 @@ requirements:
   - name: ecoscope-platform
     version: ">=2.11.14, <2.12.0"
     channel: https://repo.prefix.dev/ecoscope-workflows/
-  - name: ecoscope-workflows-ext-custom
-    version: "0.1.0rc6"
-    channel: https://repo.prefix.dev/ecoscope-workflows-custom/
+  - name: ecoscope-workflows-ext-gcf
+    git: https://github.com/Giraffe-Conservation-Foundation/ecoscope-workflows-ext-gcf.git
+    tag: v0.1.0
 
 rjsf-overrides:
   properties:
@@ -348,22 +348,17 @@ workflow:
           columns: []
           auto_detect: true
 
-      # ── REPEAT-GROUP FLATTENING ───────────────────────────────────────────────
-      # Pending packaging of flatten_gcf_repeat_groups as a workflow extension.
-      # Once published to ecoscope-workflows-ext-gcf (or ext-custom), uncomment:
-      #
-      # - name: Flatten GCF Repeat Groups
-      #   id: flatten_repeat_groups
-      #   task: flatten_gcf_repeat_groups
-      #   partial:
-      #     df: ${{ workflow.convert_event_details_timezone.return }}
-      # ─────────────────────────────────────────────────────────────────────────
+      - name: Flatten GCF Repeat Groups
+        id: flatten_repeat_groups
+        task: flatten_gcf_repeat_groups
+        partial:
+          df: ${{ workflow.convert_event_details_timezone.return }}
 
       - name: Apply Coordinate Filter to Patrol Events
         id: filter_patrol_events
         task: apply_reloc_coord_filter
         partial:
-          df: ${{ workflow.convert_event_details_timezone.return }}
+          df: ${{ workflow.flatten_repeat_groups.return }}
           roi_gdf: null
           roi_name: null
           reset_index: true
