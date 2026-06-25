@@ -1,17 +1,17 @@
 id: gcf_patrol_download
 
 requirements:
-  - name: python
-    version: "3.12.*"
-  - name: lonboard
-    version: "0.0.8"
-    channel: https://repo.prefix.dev/ecoscope-workflows/
   - name: ecoscope-platform
-    version: "2.11.14"
+    version: ">=2.11.14, <2.12.0"
     channel: https://repo.prefix.dev/ecoscope-workflows/
-  - name: ecoscope-workflows-ext-gcf
-    git: https://github.com/Giraffe-Conservation-Foundation/ecoscope-workflows-ext-gcf.git
-    tag: v0.1.0
+  - name: ecoscope-workflows-ext-custom
+    version: ">=0.1.0rc14"
+    channel: https://repo.prefix.dev/ecoscope-workflows-custom/
+  # Once ecoscope-workflows-ext-gcf is published to a conda channel, replace
+  # ext-custom above with:
+  #   - name: ecoscope-workflows-ext-gcf
+  #     version: ">=0.1.0"
+  #     channel: https://repo.prefix.dev/ecoscope-workflows-gcf/
 
 rjsf-overrides:
   properties:
@@ -353,17 +353,30 @@ workflow:
           columns: []
           auto_detect: true
 
-      - name: Flatten GCF Repeat Groups
-        id: flatten_repeat_groups
-        task: flatten_gcf_repeat_groups
-        partial:
-          df: ${{ workflow.convert_event_details_timezone.return }}
+      # ── REPEAT-GROUP FLATTENING ───────────────────────────────────────────────
+      # Requires ecoscope-workflows-ext-gcf to be published as a conda package.
+      # Setup: see ecoscope-workflows-ext-gcf/.github/workflows/publish.yml
+      # Steps to enable:
+      #   1. Create prefix.dev channel "ecoscope-workflows-gcf"
+      #   2. Add PREFIX_DEV_TOKEN secret to ecoscope-workflows-ext-gcf repo
+      #   3. Push a tag (v0.1.0) to ecoscope-workflows-ext-gcf to trigger publish
+      #   4. Switch requirements above to use ecoscope-workflows-ext-gcf
+      #   5. Uncomment the task below and update filter_patrol_events input
+      #
+      # - name: Flatten GCF Repeat Groups
+      #   id: flatten_repeat_groups
+      #   task: flatten_gcf_repeat_groups
+      #   partial:
+      #     df: ${{ workflow.convert_event_details_timezone.return }}
+      # ─────────────────────────────────────────────────────────────────────────
 
       - name: Apply Coordinate Filter to Patrol Events
         id: filter_patrol_events
         task: apply_reloc_coord_filter
         partial:
-          df: ${{ workflow.flatten_repeat_groups.return }}
+          df: ${{ workflow.convert_event_details_timezone.return }}
+          # When flatten_repeat_groups is enabled, change the above to:
+          # df: ${{ workflow.flatten_repeat_groups.return }}
           roi_gdf: null
           roi_name: null
           reset_index: true
