@@ -1,6 +1,8 @@
 id: gcf_patrol_download
 
 requirements:
+  - name: python
+    version: "3.12.*"
   - name: ecoscope-platform
     version: ">=2.11.14, <2.12.0"
     channel: https://repo.prefix.dev/ecoscope-workflows/
