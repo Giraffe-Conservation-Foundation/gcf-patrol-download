@@ -171,6 +171,13 @@
           "type": "array",
           "description": "Optional list of column names to include in the SQL query context. If specified, only these columns will be available in the 'df' table for querying. Use this to exclude columns with unsupported data types (list, dict) that cannot be stored in SQLite. If not specified, all columns are included.",
           "ecoscope:advanced": true
+        },
+        "sanitize": {
+          "default": true,
+          "title": "Sanitize",
+          "type": "boolean",
+          "description": "Whether to sanitize the DataFrame for Arrow/SQLite compatibility before querying. When True (default), complex columns (list, dict, set, bytes) are converted to JSON strings so pandasql/SQLite accepts them, removing the need for the 'columns' whitelist. Geometry columns are preserved. Set to False to pass columns through untouched.",
+          "ecoscope:advanced": true
         }
       },
       "required": [],
@@ -276,6 +283,13 @@
           "type": "array",
           "description": "Optional list of column names to include in the SQL query context. If specified, only these columns will be available in the 'df' table for querying. Use this to exclude columns with unsupported data types (list, dict) that cannot be stored in SQLite. If not specified, all columns are included.",
           "ecoscope:advanced": true
+        },
+        "sanitize": {
+          "default": true,
+          "title": "Sanitize",
+          "type": "boolean",
+          "description": "Whether to sanitize the DataFrame for Arrow/SQLite compatibility before querying. When True (default), complex columns (list, dict, set, bytes) are converted to JSON strings so pandasql/SQLite accepts them, removing the need for the 'columns' whitelist. Geometry columns are preserved. Set to False to pass columns through untouched.",
+          "ecoscope:advanced": true
         }
       },
       "required": [],
@@ -369,17 +383,22 @@
           "default": [
             {
               "url": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
-              "opacity": 1
+              "opacity": 1,
+              "max_zoom": 20,
+              "min_zoom": 0
             },
             {
               "url": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-              "opacity": 0.5
+              "opacity": 0.5,
+              "max_zoom": 20,
+              "min_zoom": 0
             }
           ],
           "items": {
             "title": "Base Layer",
             "anyOf": [
               {
+                "description": "A tiled raster layer loaded on-demand from a URL template (e.g., base maps).",
                 "properties": {
                   "url": {
                     "default": "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
@@ -404,6 +423,7 @@
                 "type": "object"
               },
               {
+                "description": "A tiled raster layer loaded on-demand from a URL template (e.g., base maps).",
                 "properties": {
                   "url": {
                     "default": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
@@ -428,6 +448,7 @@
                 "type": "object"
               },
               {
+                "description": "A tiled raster layer loaded on-demand from a URL template (e.g., base maps).",
                 "properties": {
                   "url": {
                     "default": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
@@ -452,6 +473,7 @@
                 "type": "object"
               },
               {
+                "description": "A tiled raster layer loaded on-demand from a URL template (e.g., base maps).",
                 "properties": {
                   "url": {
                     "default": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
@@ -476,30 +498,7 @@
                 "type": "object"
               },
               {
-                "properties": {
-                  "url": {
-                    "default": "https://tiles.arcgis.com/tiles/POUcpLYXNckpLjnY/arcgis/rest/services/landDx_basemap_tiles_mapservice/MapServer/tile/{z}/{y}/{x}",
-                    "title": "Preset Layer URL",
-                    "type": "string",
-                    "const": "https://tiles.arcgis.com/tiles/POUcpLYXNckpLjnY/arcgis/rest/services/landDx_basemap_tiles_mapservice/MapServer/tile/{z}/{y}/{x}",
-                    "enum": [
-                      "https://tiles.arcgis.com/tiles/POUcpLYXNckpLjnY/arcgis/rest/services/landDx_basemap_tiles_mapservice/MapServer/tile/{z}/{y}/{x}"
-                    ]
-                  },
-                  "opacity": {
-                    "default": 1,
-                    "description": "Set layer transparency from 1 (fully visible) to 0 (hidden).",
-                    "ecoscope:advanced": true,
-                    "maximum": 1.0,
-                    "minimum": 0.0,
-                    "title": "Layer Opacity",
-                    "type": "number"
-                  }
-                },
-                "title": "LandDx",
-                "type": "object"
-              },
-              {
+                "description": "A tiled raster layer loaded on-demand from a URL template (e.g., base maps).",
                 "properties": {
                   "url": {
                     "default": "https://server.arcgisonline.com/arcgis/rest/services/Elevation/World_Hillshade/MapServer/tile/{z}/{y}/{x}",
@@ -524,6 +523,7 @@
                 "type": "object"
               },
               {
+                "description": "A tiled raster layer loaded on-demand from a URL template (e.g., base maps).",
                 "properties": {
                   "url": {
                     "default": "https://example.tiles.com/{z}/{x}/{y}.png",
@@ -542,13 +542,13 @@
                     "type": "number"
                   },
                   "max_zoom": {
-                    "default": null,
+                    "default": 20,
                     "description": "Set the maximum zoom level to fetch tiles for.",
                     "title": "Custom Layer Max Zoom",
                     "type": "integer"
                   },
                   "min_zoom": {
-                    "default": null,
+                    "default": 0,
                     "description": "Set the minimum zoom level to fetch tiles for.",
                     "title": "Custom Layer Min Zoom",
                     "type": "integer"
@@ -721,28 +721,17 @@
       "type": "object"
     },
     "ValueGrouper": {
-      "title": "Category",
-      "type": "object",
       "properties": {
         "index_name": {
-          "title": "Index Name",
-          "type": "string",
-          "oneOf": [
-            {
-              "const": "patrol_serial_number",
-              "title": "Patrol Serial Number"
-            },
-            {
-              "const": "patrol_type",
-              "title": "Patrol Type"
-            },
-            {
-              "const": "patrol_subject",
-              "title": "Patrol Subject"
-            }
-          ]
+          "title": "Category",
+          "type": "string"
         }
-      }
+      },
+      "required": [
+        "index_name"
+      ],
+      "title": "Category",
+      "type": "object"
     },
     "BoundingBox": {
       "properties": {
@@ -821,7 +810,8 @@
     "sql_query_traj": {
       "ui:order": [
         "query",
-        "columns"
+        "columns",
+        "sanitize"
       ]
     },
     "filter_patrol_events": {
@@ -833,7 +823,8 @@
     "sql_query_events": {
       "ui:order": [
         "query",
-        "columns"
+        "columns",
+        "sanitize"
       ]
     },
     "persist_patrol_traj": {

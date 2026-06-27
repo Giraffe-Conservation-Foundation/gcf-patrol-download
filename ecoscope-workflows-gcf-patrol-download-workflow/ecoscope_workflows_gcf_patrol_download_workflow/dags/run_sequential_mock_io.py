@@ -104,6 +104,9 @@ from ecoscope_workflows_ext_custom.tasks.io import (
     persist_df_wrapper as persist_df_wrapper,
 )
 from ecoscope_workflows_ext_custom.tasks.skip import maybe_skip_df as maybe_skip_df
+from ecoscope_workflows_ext_gcf import (
+    flatten_gcf_repeat_groups as flatten_gcf_repeat_groups,
+)
 
 
 def main(params: dict[str, Any], validate_params_schema: bool = True):
@@ -734,6 +737,26 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         .call()
     )
 
+    flatten_repeat_groups = (
+        task(flatten_gcf_repeat_groups)
+        .validate()
+        .set_task_instance_id("flatten_repeat_groups")
+        .handle_errors()
+        .with_tracing()
+        .skipif(
+            conditions=[
+                any_is_empty_df,
+                any_dependency_skipped,
+            ],
+            unpack_depth=1,
+        )
+        .partial(
+            df=convert_event_details_timezone,
+            **(params.get("flatten_repeat_groups") or {}),
+        )
+        .call()
+    )
+
     filter_patrol_events = (
         task(apply_reloc_coord_filter)
         .validate()
@@ -748,7 +771,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             unpack_depth=1,
         )
         .partial(
-            df=convert_event_details_timezone,
+            df=flatten_repeat_groups,
             roi_gdf=None,
             roi_name=None,
             reset_index=True,
