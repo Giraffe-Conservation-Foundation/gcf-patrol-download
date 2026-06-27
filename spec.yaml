@@ -2,11 +2,14 @@ id: gcf_patrol_download
 
 requirements:
   - name: ecoscope-platform
-    version: ">=2.11.14, <2.12.0"
+    version: ">=2.16.0, <2.17.0"
     channel: https://repo.prefix.dev/ecoscope-workflows/
   - name: ecoscope-workflows-ext-custom
-    version: "0.1.0rc6"
+    version: "0.1.0rc14"
     channel: https://repo.prefix.dev/ecoscope-workflows-custom/
+  - name: ecoscope-workflows-ext-gcf
+    version: "0.1.1"
+    channel: https://repo.prefix.dev/ecoscope-workflows-gcf/
 
 rjsf-overrides:
   properties:
@@ -25,7 +28,7 @@ rjsf-overrides:
       Parquet preserves geometry and is recommended for spatial analysis in GIS tools.
 
     persist_patrol_events.properties.filename_prefix.default: "patrol_events"
-    persist_patrol_events.properties.filetypes.default: ["csv"]
+    persist_patrol_events.properties.filetypes.default: ["parquet"]
     persist_patrol_events.properties.filetypes.items.enum: ["csv", "parquet"]
     persist_patrol_events.properties.filetypes.description: >-
       CSV opens directly in Excel. Parquet preserves geometry and is recommended for
@@ -348,20 +351,17 @@ workflow:
           columns: []
           auto_detect: true
 
-      # flatten_gcf_repeat_groups is blocked pending wildlife-dynamics adding
-      # ecoscope-workflows-gcf to wt-compiler's allowed channel list, or
-      # publishing ecoscope-workflows-ext-gcf to ecoscope-workflows-custom.
-      # - name: Flatten GCF Repeat Groups
-      #   id: flatten_repeat_groups
-      #   task: flatten_gcf_repeat_groups
-      #   partial:
-      #     df: ${{ workflow.convert_event_details_timezone.return }}
+      - name: Flatten GCF Repeat Groups
+        id: flatten_repeat_groups
+        task: flatten_gcf_repeat_groups
+        partial:
+          df: ${{ workflow.convert_event_details_timezone.return }}
 
       - name: Apply Coordinate Filter to Patrol Events
         id: filter_patrol_events
         task: apply_reloc_coord_filter
         partial:
-          df: ${{ workflow.convert_event_details_timezone.return }}
+          df: ${{ workflow.flatten_repeat_groups.return }}
           roi_gdf: null
           roi_name: null
           reset_index: true
