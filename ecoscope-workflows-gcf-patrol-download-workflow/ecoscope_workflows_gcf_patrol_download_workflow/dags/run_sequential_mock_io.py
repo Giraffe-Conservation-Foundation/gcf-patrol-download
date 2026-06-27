@@ -966,9 +966,10 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         .partial(
             root_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
             sanitize=True,
+            df=patrol_traj_cols_to_string,
             **(params.get("persist_patrol_traj") or {}),
         )
-        .mapvalues(argnames=["df"], argvalues=split_patrol_traj_groups)
+        .call()
     )
 
     persist_patrol_events = (
@@ -986,9 +987,10 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         .partial(
             root_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
             sanitize=True,
+            df=pe_cols_to_string,
             **(params.get("persist_patrol_events") or {}),
         )
-        .mapvalues(argnames=["df"], argvalues=split_pe_groups)
+        .call()
     )
 
     set_skip_map = (
