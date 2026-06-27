@@ -436,9 +436,7 @@ workflow:
     partial:
       root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
       sanitize: true
-    mapvalues:
-      argnames: df
-      argvalues: ${{ workflow.split_patrol_traj_groups.return }}
+      df: ${{ workflow.patrol_traj_cols_to_string.return }}
     skipif:
       conditions:
         - never
@@ -449,9 +447,7 @@ workflow:
     partial:
       root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
       sanitize: true
-    mapvalues:
-      argnames: df
-      argvalues: ${{ workflow.split_pe_groups.return }}
+      df: ${{ workflow.pe_cols_to_string.return }}
     skipif:
       conditions:
         - never
