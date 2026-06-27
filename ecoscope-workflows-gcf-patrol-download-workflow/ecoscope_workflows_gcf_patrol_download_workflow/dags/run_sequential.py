@@ -83,6 +83,9 @@ from ecoscope_workflows_ext_custom.tasks.transformation import (
     drop_column_prefix as drop_column_prefix,
 )
 from ecoscope_workflows_ext_gcf import (
+    dissolve_patrol_trajectories as dissolve_patrol_trajectories,
+)
+from ecoscope_workflows_ext_gcf import (
     flatten_gcf_repeat_groups as flatten_gcf_repeat_groups,
 )
 from wt_contracts import validate as _validate
@@ -931,6 +934,25 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         .call()
     )
 
+    dissolve_patrol_traj = (
+        task(dissolve_patrol_trajectories)
+        .validate()
+        .set_task_instance_id("dissolve_patrol_traj")
+        .handle_errors()
+        .with_tracing()
+        .skipif(
+            conditions=[
+                any_is_empty_df,
+                any_dependency_skipped,
+            ],
+            unpack_depth=1,
+        )
+        .partial(
+            df=patrol_traj_cols_to_string, **(params.get("dissolve_patrol_traj") or {})
+        )
+        .call()
+    )
+
     persist_patrol_traj = (
         task(persist_df_wrapper)
         .validate()
@@ -946,7 +968,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         .partial(
             root_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
             sanitize=True,
-            df=patrol_traj_cols_to_string,
+            df=dissolve_patrol_traj,
             **(params.get("persist_patrol_traj") or {}),
         )
         .call()
